@@ -24,7 +24,7 @@ class Lesson(models.Model):
         max_length=200, verbose_name="Ссылка на видео", blank=True, null=True
     )
 
-    reference = models.ForeignKey(Course, verbose_name="Курс", null=True, blank=True, on_delete=models.SET_NULL)
+    course = models.ForeignKey(Course, related_name="lessons", null=True, blank=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.title
