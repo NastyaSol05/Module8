@@ -1,10 +1,20 @@
 from django.db import models
 
+from config.settings import AUTH_USER_MODEL
+
 
 class Course(models.Model):
     title = models.CharField(max_length=150, verbose_name="Название курса")
     preview = models.ImageField(verbose_name="Фотография", blank=True, null=True)
     description = models.TextField(verbose_name="Описание курса", blank=True, null=True)
+
+    owner = models.ForeignKey(
+        AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        verbose_name="Владелец курса",
+        blank=True,
+        null=True,
+    )
 
     def __str__(self):
         return self.title
@@ -24,7 +34,16 @@ class Lesson(models.Model):
         max_length=200, verbose_name="Ссылка на видео", blank=True, null=True
     )
 
-    course = models.ForeignKey(Course, related_name="lessons", null=True, blank=True, on_delete=models.CASCADE)
+    course = models.ForeignKey(
+        Course, related_name="lessons", null=True, blank=True, on_delete=models.CASCADE
+    )
+    owner = models.ForeignKey(
+        AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        verbose_name="Владелец курса",
+        blank=True,
+        null=True,
+    )
 
     def __str__(self):
         return self.title
