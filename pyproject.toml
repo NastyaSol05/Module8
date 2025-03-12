@@ -19,6 +19,8 @@ coverage = "^7.6.12"
 celery = "^5.4.0"
 drf-yasg = "^1.21.10"
 stripe = "^11.6.0"
+redis = "^5.2.1"
+django-celery-beat = "^2.7.0"
 
 
 [tool.poetry.group.lint.dependencies]
