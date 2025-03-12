@@ -5,7 +5,8 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import (TokenObtainPairView,
                                             TokenRefreshView)
 
-from users.views import PaymentsViewSet, UserCreateAPIView, PaymentsCreateAPIView
+from users.views import (PaymentsCreateAPIView, PaymentsViewSet,
+                         UserCreateAPIView)
 
 app_name = "users"
 
@@ -20,5 +21,5 @@ urlpatterns = [
         name="token_obtain_pair",
     ),
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
-    path('payment/', PaymentsCreateAPIView.as_view(), name='payment'),
+    path("payment/", PaymentsCreateAPIView.as_view(), name="payment"),
 ] + router.urls

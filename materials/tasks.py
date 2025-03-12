@@ -1,3 +1,4 @@
+import logging
 from datetime import timedelta
 
 from celery import shared_task
@@ -8,13 +9,17 @@ from config import settings
 from materials.models import Course, Subscription
 from users.models import User
 
+logger = logging.getLogger(__name__)
+
 
 @shared_task
 def course_update(course_pk):
     course = Course.objects.filter(pk=course_pk).first()
     users = User.objects.all()
     for user in users:
-        subscription = Subscription.objects.filter(course=course_pk, user=user.pk).first()
+        subscription = Subscription.objects.filter(
+            course=course_pk, user=user.pk
+        ).first()
         if subscription:
             send_mail(
                 subject=f'У нас обновление курса "{course.title}"',
@@ -26,11 +31,23 @@ def course_update(course_pk):
 
 @shared_task
 def check_last_login():
-    users = User.objects.filter(last_login__isnull=False)
+    users = User.objects.filter(
+        last_login__isnull=False, is_active=True
+    )  # Фильтруем только активных пользователей
+    deactivated_users = []
+
     for user in users:
         if timezone.now() - user.last_login > timedelta(days=30):
             user.is_active = False
             user.save()
-            return f'Пользователь {user.email} заблокирован'
+            deactivated_users.append(user.email)
+            logger.info(
+                f"Пользователь {user.email} заблокирован"
+            )  # Запись в лог вместо print()
         else:
-            return f'Пользователь {user.email} в сети'
+            logger.info(f"Пользователь {user.email} в сети")
+
+    if deactivated_users:
+        return f'Заблокированы пользователи: {", ".join(deactivated_users)}'
+    else:
+        return "Нет пользователей для блокировки"

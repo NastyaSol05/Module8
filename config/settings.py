@@ -128,11 +128,11 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
 
-CELERY_BROKER_URL = os.getenv("LOCATION") # ссылка на редис
+CELERY_BROKER_URL = os.getenv("LOCATION")  # ссылка на редис
 
-CELERY_RESULT_BACKEND = os.getenv("LOCATION") # ссылка на редис
+CELERY_RESULT_BACKEND = os.getenv("LOCATION")  # ссылка на редис
 
-CELERY_TIMEZONE = 'UTC'
+CELERY_TIMEZONE = "UTC"
 
 CELERY_TASK_TRACK_STARTED = True
 
