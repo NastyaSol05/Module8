@@ -12,6 +12,7 @@ from materials.serializers import (CourseDetailSerializer, CourseSerializer,
                                    LessonSerializer, SubscriptionSerializer)
 from materials.tasks import course_update
 from users.permmissions import IsModer, IsOwner
+from materials.tasks import course_update
 
 
 class CourseViewSet(ModelViewSet):
@@ -32,6 +33,12 @@ class CourseViewSet(ModelViewSet):
         elif self.action == "destroy":
             self.permission_classes = (IsModer | IsOwner,)
         return super().get_permissions()
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        course_update.delay(instance.pk)
+        return instance
+
 
     def perform_update(self, serializer):
         instance = serializer.save()

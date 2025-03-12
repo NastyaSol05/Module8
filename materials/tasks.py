@@ -33,7 +33,7 @@ def course_update(course_pk):
 def check_last_login():
     users = User.objects.filter(
         last_login__isnull=False, is_active=True
-    )  # Фильтруем только активных пользователей
+    )
     deactivated_users = []
 
     for user in users:
@@ -43,7 +43,7 @@ def check_last_login():
             deactivated_users.append(user.email)
             logger.info(
                 f"Пользователь {user.email} заблокирован"
-            )  # Запись в лог вместо print()
+            )
         else:
             logger.info(f"Пользователь {user.email} в сети")
 
