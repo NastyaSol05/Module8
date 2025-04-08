@@ -154,3 +154,5 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": timedelta(days=1),
     },
 }
+
+STRIPE_API_KEY = os.getenv("STRIPE_API_KEY")
