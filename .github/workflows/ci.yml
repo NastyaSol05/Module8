@@ -8,27 +8,6 @@ jobs:
     env:
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
       DJANGO_SETTINGS_MODULE: "config.settings"
-      DB_NAME: DB_NAME
-      DB_USER: DB_USER
-      DB_PASSWORD: DB_PASSWORD
-      DB_HOST: DB_HOST
-      DB_PORT: DB_PORT
-
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          DB_NAME: DB_NAME
-          DB_USER: DB_USER
-          DB_PASSWORD: DB_PASSWORD
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
       - name: Check out code
         uses: actions/checkout@v3
@@ -54,18 +33,6 @@ jobs:
       - name: Create .env file
         run: |
           echo "SECRET_KEY=$SECRET_KEY" > .env
-          echo "DB_NAME=$DB_NAME" >> .env
-          echo "DB_USER=$DB_USER" >> .env
-          echo "DB_PASSWORD=$DB_PASSWORD" >> .env
-          echo "DB_HOST=$DB_HOST" >> .env
-          echo "DB_PORT=$DB_PORT" >> .env
-
-      - name: Wait for PostgreSQL
-        run: |
-          until pg_isready -h localhost -p 5432; do
-            echo "Waiting for PostgreSQL..."
-            sleep 1
-          done
 
       - name: Run migrations
         run: python manage.py migrate
