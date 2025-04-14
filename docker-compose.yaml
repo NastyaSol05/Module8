@@ -1,75 +1,76 @@
 version: '3.9'
 
 services:
-
-  redis:
-    image: redis:latest
-    restart: on-failure
-    expose:
-      - '6379'
-
-  db:
-    image: postgres:16-alpine
-    restart: on-failure
-    env_file:
-      - .env
-    environment:
-      POSTGRES_DB: ${DB_NAME}       # Используем DB_NAME из .env
-      POSTGRES_USER: ${DB_USER}     # Используем DB_USER из .env
-      POSTGRES_PASSWORD: ${DB_PASSWORD}  # Используем DB_PASSWORD из .env
-    expose:
-      - '5432'
-    volumes:
-      - ./pg_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER}']
-      interval: 10s
-      retries: 5
-      timeout: 5s
-
   web:
     build: .
     command: >
-      sh -c "
-        python manage.py migrate &&
-        python manage.py collectstatic --noinput &&
-        python manage.py runserver 0.0.0.0:8000
-      "
-    volumes:
-      - .:/app
-    ports:
-      - '8000:8000'
+      bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     env_file:
       - .env
+    volumes:
+      - .:/code
+      - static_volume:/code/static
+    ports:
+      - "8000:8000"
     depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_started
+      - db
+      - redis
+      - celery
+      - celery-beat
+
+  db:
+    image: postgres
+    env_file:
+      - .env
+    expose:
+      - "5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:latest
+    expose:
+      - "6379"
+    restart: always
 
   celery:
     build: .
-    command: celery -A config worker -l info
-    volumes:
-      - .:/app
+    command: celery -A your_project_name worker --loglevel=info
     env_file:
       - .env
     depends_on:
       - redis
       - db
-    restart: on-failure
+    volumes:
+      - .:/code
 
   celery-beat:
     build: .
-    command: celery -A config beat -l info
-    volumes:
-      - .:/app
+    command: celery -A your_project_name beat --loglevel=info
     env_file:
       - .env
     depends_on:
       - redis
       - db
-    restart: on-failure
+    volumes:
+      - .:/code
+
+  nginx:
+    build: .
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./html:/usr/share/nginx/html
+
+networks:
+  default:
 
 volumes:
-  pg_data:
+  postgres_data:
+  static_volume:
