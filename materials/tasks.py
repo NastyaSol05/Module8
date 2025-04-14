@@ -31,9 +31,7 @@ def course_update(course_pk):
 
 @shared_task
 def check_last_login():
-    users = User.objects.filter(
-        last_login__isnull=False, is_active=True
-    )
+    users = User.objects.filter(last_login__isnull=False, is_active=True)
     deactivated_users = []
 
     for user in users:
@@ -41,9 +39,7 @@ def check_last_login():
             user.is_active = False
             user.save()
             deactivated_users.append(user.email)
-            logger.info(
-                f"Пользователь {user.email} заблокирован"
-            )
+            logger.info(f"Пользователь {user.email} заблокирован")
         else:
             logger.info(f"Пользователь {user.email} в сети")
 
