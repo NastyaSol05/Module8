@@ -81,7 +81,7 @@ jobs:
       - name: Set up SHH
         uses: webfactory/shh-agent@v0.8.1
         with:
-          shh-private-key: ${{ secrets.SHH_KEY }}
+          shh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Deploy to Server
         run: |
