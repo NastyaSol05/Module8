@@ -157,6 +157,11 @@ CELERY_BEAT_SCHEDULE = {
 
 STRIPE_API_KEY = os.getenv("STRIPE_API_KEY")
 
+if 'test' in sys.argv:
+    CELERY_ALWAYS_EAGER = True
+    CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
+
+
 if "test" in sys.argv:
     DATABASES = {
         "default": {
