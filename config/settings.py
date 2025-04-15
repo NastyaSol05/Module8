@@ -1,4 +1,5 @@
 import os
+import sys
 from datetime import timedelta
 from pathlib import Path
 
@@ -155,3 +156,7 @@ CELERY_BEAT_SCHEDULE = {
 }
 
 STRIPE_API_KEY = os.getenv("STRIPE_API_KEY")
+
+if 'test' in sys.argv:
+    CELERY_ALWAYS_EAGER = True
+    CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
