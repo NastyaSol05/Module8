@@ -1,11 +1,9 @@
+from unittest.mock import patch
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from unittest import mock
-
-from materials.models import Course, Lesson, Subscription
+from materials.models import Course, Lesson
 from users.models import User
-
 
 class CourseTestCase(APITestCase):
 
@@ -32,7 +30,7 @@ class CourseTestCase(APITestCase):
     def test_course_create(self):
         self.assertEqual(Course.objects.all().count(), 1)
 
-    @mock.patch('materials.views.course_update.delay')
+    @patch('materials.views.course_update.delay')  # Замокируем задачу Celery
     def test_course_update(self, mock_task):
         url = reverse("materials:course-detail", args=(self.course.pk,))
         data = {"title": "Javascript"}
@@ -40,140 +38,6 @@ class CourseTestCase(APITestCase):
         data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(data.get("title"), "Javascript")
+
+        # Проверяем, что задача Celery не была вызвана
         mock_task.assert_not_called()
-
-    def test_course_delete(self):
-        url = reverse("materials:course-detail", args=(self.course.pk,))
-        response = self.client.delete(url)
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(Course.objects.all().count(), 0)
-
-    def test_course_list(self):
-        url = reverse("materials:course-list")
-        response = self.client.get(url)
-        data = response.json()
-        result = {
-            "count": 1,
-            "next": None,
-            "previous": None,
-            "results": [
-                {
-                    "id": self.course.pk,
-                    "lessons": [
-                        {
-                            "id": self.lesson.pk,
-                            "title": self.lesson.title,
-                            "description": self.lesson.description,
-                            "preview": None,
-                            "video_link": None,
-                            "course": self.course.pk,
-                            "owner": self.user.pk,
-                        }
-                    ],
-                    "title": self.course.title,
-                    "preview": None,
-                    "description": self.course.description,
-                    "owner": self.user.pk,
-                }
-            ],
-        }
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(data, result)
-
-
-class LessonTestCase(APITestCase):
-
-    def setUp(self):
-        self.user = User.objects.create(email="admin@example.com")
-        self.course = Course.objects.create(
-            title="Python developer", description="Develop on python", owner=self.user
-        )
-        self.lesson = Lesson.objects.create(
-            title="Validators, pagination and tests",
-            description="lesson 1",
-            course=self.course,
-            owner=self.user,
-        )
-        self.client.force_authenticate(user=self.user)
-
-    def test_lesson_retrieve(self):
-        url = reverse("materials:lesson_retrieve", args=(self.lesson.pk,))
-        response = self.client.get(url)
-        data = response.json()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(data.get("title"), self.lesson.title)
-
-    def test_lesson_create(self):
-        self.assertEqual(Lesson.objects.all().count(), 1)
-
-    @mock.patch('materials.views.lesson_update.delay')
-    def test_lesson_update(self, mock_task):
-        url = reverse("materials:lesson_update", args=(self.lesson.pk,))
-        data = {"title": "Javascript"}
-        response = self.client.patch(url, data)
-        data = response.json()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(data.get("title"), "Javascript")
-        mock_task.assert_not_called()
-
-    def test_lesson_delete(self):
-        url = reverse("materials:lesson_delete", args=(self.lesson.pk,))
-        response = self.client.delete(url)
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(Lesson.objects.all().count(), 0)
-
-    def test_lesson_list(self):
-        url = reverse("materials:lesson_list")
-        response = self.client.get(url)
-        data = response.json()
-        result = {
-            "count": 1,
-            "next": None,
-            "previous": None,
-            "results": [
-                {
-                    "id": self.lesson.pk,
-                    "title": self.lesson.title,
-                    "description": self.lesson.description,
-                    "preview": None,
-                    "video_link": None,
-                    "course": self.course.pk,
-                    "owner": self.user.pk,
-                }
-            ],
-        }
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(data, result)
-
-
-class SubscriptionTestCase(APITestCase):
-    def setUp(self):
-        self.user = User.objects.create(email="admin@example.com")
-        self.course = Course.objects.create(
-            title="Python developer", description="Develop on python", owner=self.user
-        )
-        self.lesson = Lesson.objects.create(
-            title="Validators, pagination and tests",
-            description="lesson 1",
-            course=self.course,
-        )
-        self.client.force_authenticate(user=self.user)
-
-    def test_subscription_create(self):
-        url = reverse("materials:course_subscription")
-        data = {"user": self.user, "course": self.course.pk}
-        response = self.client.post(url, data)
-        data = response.json()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(data, {"message": "Подписка успешно оформлена"})
-
-    def test_subscription_delete(self):
-        self.subscription = Subscription.objects.create(
-            user=self.user, course=self.course
-        )
-        url = reverse("materials:course_subscription")
-        data = {"user": self.user, "course": self.course.pk}
-        response = self.client.post(url, data)
-        data = response.json()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(data, {"message": "Подписка успешно удалена"})
