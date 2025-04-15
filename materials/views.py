@@ -1,26 +1,17 @@
 from django.shortcuts import get_object_or_404
-from rest_framework.generics import (
-    CreateAPIView,
-    DestroyAPIView,
-    ListAPIView,
-    RetrieveAPIView,
-    UpdateAPIView,
-)
+from rest_framework.generics import (CreateAPIView, DestroyAPIView,
+                                     ListAPIView, RetrieveAPIView,
+                                     UpdateAPIView)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from materials.models import Course, Lesson, Subscription
 from materials.paginations import CustomPagination
-from materials.serializers import (
-    CourseDetailSerializer,
-    CourseSerializer,
-    LessonSerializer,
-    SubscriptionSerializer,
-)
-
-from users.permmissions import IsModer, IsOwner
+from materials.serializers import (CourseDetailSerializer, CourseSerializer,
+                                   LessonSerializer, SubscriptionSerializer)
 from materials.tasks import course_update
+from users.permmissions import IsModer, IsOwner
 
 
 class CourseViewSet(ModelViewSet):
