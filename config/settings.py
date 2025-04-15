@@ -79,7 +79,7 @@ DATABASES = {
         "NAME": os.getenv("DB_NAME"),
         "USER": os.getenv("DB_USER"),
         "PASSWORD": os.getenv("DB_PASSWORD"),
-        "HOST": os.getenv("DB_HOST"),
+        "HOST": 'db',
         "PORT": int(os.getenv("DB_PORT", "5432")),  # default postgres port
     }
 }
@@ -112,7 +112,7 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
-STATICFILES_DIRS = (BASE_DIR / "static",)
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
