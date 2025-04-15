@@ -1,6 +1,7 @@
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
+from unittest import mock
 
 from materials.models import Course, Lesson, Subscription
 from users.models import User
@@ -31,17 +32,18 @@ class CourseTestCase(APITestCase):
     def test_course_create(self):
         self.assertEqual(Course.objects.all().count(), 1)
 
-    def test_course_update(self):
+    @mock.patch('materials.views.course_update.delay')
+    def test_course_update(self, mock_task):
         url = reverse("materials:course-detail", args=(self.course.pk,))
         data = {"title": "Javascript"}
         response = self.client.patch(url, data)
         data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(data.get("title"), "Javascript")
+        mock_task.assert_not_called()
 
     def test_course_delete(self):
         url = reverse("materials:course-detail", args=(self.course.pk,))
-
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(Course.objects.all().count(), 0)
@@ -104,17 +106,18 @@ class LessonTestCase(APITestCase):
     def test_lesson_create(self):
         self.assertEqual(Lesson.objects.all().count(), 1)
 
-    def test_lesson_update(self):
+    @mock.patch('materials.views.lesson_update.delay')
+    def test_lesson_update(self, mock_task):
         url = reverse("materials:lesson_update", args=(self.lesson.pk,))
         data = {"title": "Javascript"}
         response = self.client.patch(url, data)
         data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(data.get("title"), "Javascript")
+        mock_task.assert_not_called()
 
     def test_lesson_delete(self):
         url = reverse("materials:lesson_delete", args=(self.lesson.pk,))
-
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(Lesson.objects.all().count(), 0)
