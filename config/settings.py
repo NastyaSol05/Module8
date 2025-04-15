@@ -9,7 +9,7 @@ load_dotenv(override=True)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-SECRET_KEY = 'django-insecure-0mf9c2#^ml#m*g-ks-v8+n0rm^!7e=2#9nuedvasippkf&of_o'
+SECRET_KEY = "django-insecure-0mf9c2#^ml#m*g-ks-v8+n0rm^!7e=2#9nuedvasippkf&of_o"
 
 DEBUG = True if os.getenv("DEBUG") == "True" else False
 
@@ -111,7 +111,7 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
-STATICFILES_DIRS = [BASE_DIR / 'static']
+STATICFILES_DIRS = [BASE_DIR / "static"]
 
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
